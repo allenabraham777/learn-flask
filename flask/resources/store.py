@@ -3,6 +3,7 @@ from flask import Flask
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import stores
+from schemas import StoreSchema
 
 bp = Blueprint("stores", __name__, description="Operation on stores")
 
@@ -21,9 +22,8 @@ class Store(MethodView):
     except KeyError:
       return abort(404, message = "Store not found")
 
-  def put(self, store_id):
-    request_data = request.get_json()
-
+  @bp.arguments(StoreSchema)
+  def put(self, request_data, store_id):
     if store_id not in stores:
       return abort(404, message = "Store not found")
 
@@ -43,8 +43,8 @@ class StoreList(MethodView):
   def get(self):
     return {"stores": list(stores.values())}
 
-  def post(self):
-    request_data = request.get_json()
+  @bp.arguments(StoreSchema)
+  def post(self, request_data):
     if "name" not in request_data :
       return abort(400, message = "Bad request")
 

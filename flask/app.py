@@ -39,7 +39,7 @@ def delete_store(store_id):
     return abort(404, message = "Store not found")
 
 @app.put("/store/<string:store_id>")
-def update_item(store_id):
+def update_store(store_id):
   request_data = request.get_json()
 
   if store_id not in stores:

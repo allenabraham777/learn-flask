@@ -9,6 +9,13 @@ app = Flask(__name__)
 def get_stores():
   return {"stores": list(stores.values())}
 
+@app.get("/store/<string:store_id>")
+def get_store(store_id):
+  try:
+    return stores[store_id]
+  except KeyError:
+    return abort(404, message = "Store not found")
+
 @app.post("/store")
 def create_store():
   request_data = request.get_json()
@@ -23,10 +30,42 @@ def create_store():
   stores[store_id] = new_store
   return new_store, 201
 
+@app.delete("/store/<string:store_id>")
+def delete_store(store_id):
+  try:
+    del stores[store_id]
+    return { "message": "Store deleted" }
+  except KeyError:
+    return abort(404, message = "Store not found")
+
+@app.put("/store/<string:store_id>")
+def update_item(store_id):
+  request_data = request.get_json()
+
+  if store_id not in stores:
+    return abort(404, message = "Store not found")
+
+  if "name" not in request_data :
+    return abort(400, message = "Bad request")
+
+  store = stores[store_id]
+  
+  store["name"] = request_data["name"]
+
+  stores[store_id] = store
+  
+  return store, 200
+
 @app.get("/item")
 def get_items():
   return {"items": list(items.values())}
 
+@app.get("/item/<string:item_id>")
+def get_item(item_id):
+  try:
+    return items[item_id]
+  except KeyError:
+    return abort(404, message = "Item not found")
 
 @app.post("/item")
 def create_item():
@@ -51,16 +90,32 @@ def create_item():
   items[item_id] = new_item
   return new_item, 201
 
-@app.get("/store/<string:store_id>")
-def get_store(store_id):
+@app.delete("/item/<string:item_id>")
+def delete_item(item_id):
   try:
-    return stores[store_id]
-  except KeyError:
-    return abort(404, message = "Store not found")
-
-@app.get("/item/<string:item_id>")
-def get_item(item_id):
-  try:
-    return items[item_id]
+    del items[item_id]
+    return {"message": "Item deleted"}
   except KeyError:
     return abort(404, message = "Item not found")
+
+@app.put("/item/<string:item_id>")
+def update_item(item_id):
+  request_data = request.get_json()
+
+  if item_id not in items:
+    return abort(404, message = "Item not found")
+
+  if (
+    "price" not in request_data or
+    "name" not in request_data
+  ):
+    return abort(400, message = "Bad request")
+
+  item = items[item_id]
+  
+  item["name"] = request_data["name"]
+  item["price"] = request_data["price"]
+
+  items[item_id] = item
+
+  return item, 200

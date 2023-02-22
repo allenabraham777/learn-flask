@@ -9,6 +9,7 @@ bp = Blueprint("stores", __name__, description="Operation on stores")
 
 @bp.route("/store/<string:store_id>")
 class Store(MethodView):
+  @bp.response(200, StoreSchema)
   def get(self, store_id):
     try:
       return stores[store_id]
@@ -23,6 +24,7 @@ class Store(MethodView):
       return abort(404, message = "Store not found")
 
   @bp.arguments(StoreSchema)
+  @bp.response(200, StoreSchema)
   def put(self, request_data, store_id):
     if store_id not in stores:
       return abort(404, message = "Store not found")
@@ -40,10 +42,12 @@ class Store(MethodView):
 
 @bp.route("/store")
 class StoreList(MethodView):
+  @bp.response(200, StoreSchema(many=True))
   def get(self):
-    return {"stores": list(stores.values())}
+    return stores.values()
 
   @bp.arguments(StoreSchema)
+  @bp.response(200, StoreSchema)
   def post(self, request_data):
     if "name" not in request_data :
       return abort(400, message = "Bad request")
